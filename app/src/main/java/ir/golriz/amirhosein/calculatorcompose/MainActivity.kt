@@ -1,55 +1,44 @@
 package ir.golriz.amirhosein.calculatorcompose
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import ir.golriz.amirhosein.calculatorcompose.ui.theme.CalculatorComposeTheme
-import ir.golriz.amirhosein.calculatorcompose.ui.theme.OrangeColor
 
-lateinit var textNumbers: MutableState<String>
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val viewModel = ViewModelProvider(this)[CalculatorViewModel::class.java]
         setContent {
             CalculatorComposeTheme {
-                CalculatorScreen()
+                CalculatorScreen(viewModel)
             }
         }
-
-
     }
-
 }
 
 @Composable
-fun CalculatorScreen() {
-
-    val isResult = remember { mutableStateOf(false) }
-    textNumbers = remember { mutableStateOf("0") }
+fun CalculatorScreen(viewModel: CalculatorViewModel) {
 
     Column(
         Modifier
@@ -66,7 +55,11 @@ fun CalculatorScreen() {
             verticalArrangement = Arrangement.Bottom
         ) {
 
-            TopDesign(isResult)
+            TopDesign(
+                viewModel.isShowResult,
+                viewModel.textNumbersFirst,
+                viewModel.textNumberSecond
+            )
 
         }
 
@@ -93,7 +86,7 @@ fun CalculatorScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            BottomDesign()
+            BottomDesign(viewModel::onAction)
 
         }
 
@@ -102,13 +95,17 @@ fun CalculatorScreen() {
 }
 
 @Composable
-fun TopDesign(isResult: MutableState<Boolean>) {
+fun TopDesign(
+    isResult: MutableState<Boolean>,
+    textNumbersFirst: MutableState<String>,
+    textNumberSecond: MutableState<String>
+) {
     if (isResult.value) {
-        TextCalculate(textNumbers.value, MaterialTheme.typography.h3, Color.Black)
-        TextCalculate("0", MaterialTheme.typography.h6, Color.DarkGray)
+        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h3, Color.Black)
+        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h6, Color.DarkGray)
     } else {
-        TextCalculate(textNumbers.value, MaterialTheme.typography.h5, Color.DarkGray)
-        TextCalculate("0", MaterialTheme.typography.h4, Color.Black)
+        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h5, Color.DarkGray)
+        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h4, Color.Black)
     }
 
 }
@@ -130,7 +127,7 @@ fun TextCalculate(text: String, textStyle: TextStyle, color: Color) {
 }
 
 @Composable
-fun BottomDesign() {
+fun BottomDesign(onAction: (CalculatorAction) -> Unit) {
 
     Row(
         Modifier.fillMaxWidth(),
@@ -139,76 +136,36 @@ fun BottomDesign() {
     ) {
 
 
-        OperatorDesign(icon = R.drawable.ic_backspace, size = 40.dp, detailsIcon = "Remove") {
-            if (textNumbers.value.isNotEmpty()) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-            }
-        }
-
-        OperatorDesign(
-            icon = R.drawable.ic_left_parentheses,
-            size = 28.dp,
-            detailsIcon = "ParenthesesLeft"
+        CalculatorButton(
+            textButton = "⌫",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
         ) {
-            textNumbers.value += "("
+            onAction(CalculatorAction.Delete)
         }
 
-        OperatorDesign(
-            icon = R.drawable.ic_right_parentheses,
-            size = 28.dp,
-            detailsIcon = "ParenthesesRight"
+        CalculatorButton(
+            textButton = "(",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
         ) {
-            textNumbers.value += ")"
+            onAction(CalculatorAction.Operation(CalculatorOperation.ParenthesesLeft))
         }
 
-        OperatorDesign(icon = R.drawable.ic_divide, size = 40.dp, detailsIcon = "Divide") {
-            if (
-                textNumbers.value.last() == '*' ||
-                textNumbers.value.last() == '+' ||
-                textNumbers.value.last() == '-'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += "/"
-            } else if (textNumbers.value.last() != '/') {
-                textNumbers.value += "/"
-            }
-        }
-
-    }
-
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        NumberDesign(number = "7") {
-            textNumbers.value += "7"
-        }
-        NumberDesign(number = "8") {
-            textNumbers.value += "8"
-        }
-        NumberDesign(number = "9") {
-            textNumbers.value += "9"
-        }
-        OperatorDesign(
-            icon = R.drawable.ic_multiply,
-            size = 30.dp,
-            detailsIcon = "Multiplication"
+        CalculatorButton(
+            textButton = ")",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
         ) {
-            if (
-                textNumbers.value.last() == '+' ||
-                textNumbers.value.last() == '/' ||
-                textNumbers.value.last() == '-'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += "*"
-            } else if (textNumbers.value.last() != '*') {
-                textNumbers.value += "*"
-            }
+            onAction(CalculatorAction.Operation(CalculatorOperation.ParenthesesRight))
+        }
+
+        CalculatorButton(
+            textButton = "÷",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Operation(CalculatorOperation.Divide))
         }
 
     }
@@ -219,59 +176,33 @@ fun BottomDesign() {
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        NumberDesign(number = "4") {
-            textNumbers.value += "4"
+        CalculatorButton(
+            textButton = "7",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(7))
         }
-        NumberDesign(number = "5") {
-            textNumbers.value += "5"
+        CalculatorButton(
+            textButton = "8",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(8))
         }
-        NumberDesign(number = "6") {
-            textNumbers.value += "6"
+        CalculatorButton(
+            textButton = "9",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(9))
         }
-        OperatorDesign(icon = R.drawable.ic_minus, size = 36.dp, detailsIcon = "Minus") {
-            if (
-                textNumbers.value.last() == '*' ||
-                textNumbers.value.last() == '/' ||
-                textNumbers.value.last() == '+'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += "-"
-            } else if (textNumbers.value.last() != '-') {
-                textNumbers.value += "-"
-            }
-        }
-
-    }
-
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        NumberDesign(number = "1") {
-            textNumbers.value += "1"
-        }
-        NumberDesign(number = "2") {
-            textNumbers.value += "2"
-        }
-        NumberDesign(number = "3") {
-            textNumbers.value += "3"
-        }
-        OperatorDesign(icon = R.drawable.ic_sum, size = 40.dp, detailsIcon = "Sum") {
-
-            if (
-                textNumbers.value.last() == '*' ||
-                textNumbers.value.last() == '/' ||
-                textNumbers.value.last() == '-'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += "+"
-            } else if (textNumbers.value.last() != '+') {
-                textNumbers.value += "+"
-            }
+        CalculatorButton(
+            textButton = "×",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Operation(CalculatorOperation.Multiply))
         }
 
     }
@@ -282,119 +213,147 @@ fun BottomDesign() {
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        OperatorDesign(icon = R.drawable.ic_clear, size = 30.dp, detailsIcon = "Clear") {
-            textNumbers.value = "0"
+        CalculatorButton(
+            textButton = "4",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(4))
+        }
+        CalculatorButton(
+            textButton = "5",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(5))
+        }
+        CalculatorButton(
+            textButton = "6",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(6))
+        }
+        CalculatorButton(
+            textButton = "-",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Operation(CalculatorOperation.Minus))
         }
 
-        NumberDesign(number = "0") {
-            textNumbers.value += "0"
+    }
+
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        CalculatorButton(
+            textButton = "1",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(1))
+        }
+        CalculatorButton(
+            textButton = "2",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(2))
+        }
+        CalculatorButton(
+            textButton = "3",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(3))
+        }
+        CalculatorButton(
+            textButton = "-",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Operation(CalculatorOperation.Minus))
         }
 
-        NumberDesign(number = ".") {
+    }
 
-            if (textNumbers.value.isNotEmpty()) {
-                if (
-                    !textNumbers.value.contains(".") &&
-                    textNumbers.value.last() != '+' &&
-                    textNumbers.value.last() != '-' &&
-                    textNumbers.value.last() != '*' &&
-                    textNumbers.value.last() != '/' &&
-                    textNumbers.value.last() != '(' &&
-                    textNumbers.value.last() != ')'
-                ) {
-                    Log.e("Adas", textNumbers.value.last().toString())
-                    if (textNumbers.value == "0") {
-                        textNumbers.value += "0."
-                    } else {
-                        textNumbers.value += "."
-                    }
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
-                }
-            } else {
-                textNumbers.value += "0."
-            }
+        CalculatorButton(
+            textButton = "C",
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Clear)
+        }
+        CalculatorButton(
+            textButton = "0",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Number(0))
         }
 
-        EqualIcon {
+        CalculatorButton(
+            textButton = ".",
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+        ) {
+            onAction(CalculatorAction.Decimal)
+        }
 
+        CalculatorButton(
+            textButton = "=",
+            color = MaterialTheme.colors.onSecondary,
+            modifier = Modifier.background(MaterialTheme.colors.secondary)
+        ) {
+            onAction(CalculatorAction.Equal)
         }
 
     }
 
 }
 
-@Composable
-fun OperatorDesign(icon: Int, size: Dp, detailsIcon: String, OnOperatorClicked: () -> Unit) {
-
-    IconButton(
-        onClick = OnOperatorClicked,
-        modifier = Modifier
-            .size(64.dp)
-    ) {
-
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = detailsIcon,
-            tint = OrangeColor,
-            modifier = Modifier.size(size)
-        )
-
-    }
-
-}
 
 @Composable
-fun NumberDesign(number: String, OnNumberClicked: () -> Unit) {
-
+private fun CalculatorButton(
+    textButton: String,
+    color: Color,
+    modifier: Modifier,
+    OnButtonClicked: () -> Unit
+) {
     Box(
         modifier = Modifier
             .size(64.dp)
             .clip(CircleShape)
-            .clickable {
-                if (textNumbers.value.length == 1 && textNumbers.value == "0") {
-                    textNumbers.value = ""
-                }
-                OnNumberClicked.invoke()
-            },
+            .clickable { OnButtonClicked.invoke() }
+            .then(modifier),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = number,
+            text = textButton,
+            color = color,
             style = MaterialTheme.typography.h4,
-            color = Color.Black,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
     }
-
-
 }
 
-@Composable
-fun EqualIcon(OnResultClicked: () -> Unit) {
-
-    IconButton(
-        onClick = OnResultClicked,
-        modifier = Modifier
-            .size(64.dp)
-            .background(OrangeColor, CircleShape)
-    ) {
-
-        Icon(
-            painter = painterResource(id = R.drawable.ic_equal),
-            contentDescription = "Equal",
-            tint = Color.White,
-            modifier = Modifier.size(40.dp)
-        )
-
-    }
-
-}
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     CalculatorComposeTheme {
-        CalculatorScreen()
+        //CalculatorScreen(viewModel)
     }
 }
 

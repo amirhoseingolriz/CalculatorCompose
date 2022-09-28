@@ -6,13 +6,14 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import ir.golriz.amirhosein.calculatorcompose.ui.theme.OrangeColor
 
 
 private val DarkColorPalette = darkColors(
-    primary = Color.Black,
-    primaryVariant = Color.Black,
+    primary = Color.DarkGray,
+    primaryVariant = Color.DarkGray,
     secondary = OrangeColor,
+    onPrimary = Color.White,
+    onSecondary = Color.White
 
 )
 
@@ -20,7 +21,9 @@ private val DarkColorPalette = darkColors(
 private val LightColorPalette = lightColors(
     primary = Color.White,
     primaryVariant = Color.White,
-    secondary = OrangeColor
+    secondary = OrangeColor,
+    onPrimary = Color.Black,
+    onSecondary = Color.White
 
     /* Other default colors to override
     background = Color.White,
