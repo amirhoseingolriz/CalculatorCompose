@@ -1,5 +1,6 @@
 package ir.golriz.amirhosein.calculatorcompose
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
@@ -12,6 +13,11 @@ class CalculatorViewModel : ViewModel() {
 
     fun onAction(action: CalculatorAction) {
 
+
+        when(action){
+
+
+        }
 
         /*
         Divide

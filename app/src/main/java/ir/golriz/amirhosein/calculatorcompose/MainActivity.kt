@@ -102,10 +102,10 @@ fun TopDesign(
 ) {
     if (isResult.value) {
         TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h3, Color.Black)
-        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h6, Color.DarkGray)
+        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h4, Color.DarkGray)
     } else {
-        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h5, Color.DarkGray)
-        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h4, Color.Black)
+        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h4, Color.DarkGray)
+        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h3, Color.Black)
     }
 
 }
@@ -272,7 +272,7 @@ fun BottomDesign(onAction: (CalculatorAction) -> Unit) {
             onAction(CalculatorAction.Number(3))
         }
         CalculatorButton(
-            textButton = "-",
+            textButton = "+",
             color = MaterialTheme.colors.secondary,
             modifier = Modifier
         ) {
@@ -313,7 +313,7 @@ fun BottomDesign(onAction: (CalculatorAction) -> Unit) {
         CalculatorButton(
             textButton = "=",
             color = MaterialTheme.colors.onSecondary,
-            modifier = Modifier.background(MaterialTheme.colors.secondary)
+            modifier = Modifier.background(MaterialTheme.colors.secondary).padding(bottom = 4.dp)
         ) {
             onAction(CalculatorAction.Equal)
         }
@@ -342,7 +342,6 @@ private fun CalculatorButton(
             text = textButton,
             color = color,
             style = MaterialTheme.typography.h4,
-            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
     }
