@@ -51,12 +51,12 @@ class CalculatorViewModel : ViewModel() {
 
         if (isShowResult.value) {
             isShowResult.value = false
-            textNumberSecond.value = "0"
             if (!errorExpress.value.first) {
                 textNumbersFirst.value = textNumberSecond.value
             } else {
                 textNumbersFirst.value = "0"
             }
+            textNumberSecond.value = "0"
         }
         if ((textNumbersFirst.value.last() == '+' ||
                     textNumbersFirst.value.last() == '-' ||
