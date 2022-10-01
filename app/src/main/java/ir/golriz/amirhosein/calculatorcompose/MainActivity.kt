@@ -1,8 +1,6 @@
 package ir.golriz.amirhosein.calculatorcompose
 
-import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -22,33 +20,40 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import ir.golriz.amirhosein.calculatorcompose.ui.theme.CalculatorComposeTheme
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val viewModel = ViewModelProvider(this)[CalculatorViewModel::class.java]
         setContent {
             CalculatorComposeTheme {
-                CalculatorScreen(viewModel = viewModel, context = this)
+                //ChangeStatusBar Color
+                val systemUiController = rememberSystemUiController()
+                systemUiController.setStatusBarColor(color = MaterialTheme.colors.primary)
+
+                CalculatorScreen(viewModel = viewModel)
             }
         }
     }
 }
 
 @Composable
-fun CalculatorScreen(viewModel: CalculatorViewModel, context: Context) {
+fun CalculatorScreen(viewModel: CalculatorViewModel) {
 
     Column(
         Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colors.primary)
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
+
+
+        //Live calculation
+        viewModel.liveExpress()
 
 
         //TopDesign
@@ -62,9 +67,7 @@ fun CalculatorScreen(viewModel: CalculatorViewModel, context: Context) {
             TopDesign(
                 isResult = viewModel.isShowResult,
                 textNumbersFirst = viewModel.textNumbersFirst,
-                textNumberSecond = viewModel.textNumberSecond,
-                errorExpress = viewModel.errorExpress,
-                context = context
+                textNumberSecond = viewModel.textNumberSecond
             )
 
         }
@@ -104,24 +107,38 @@ fun CalculatorScreen(viewModel: CalculatorViewModel, context: Context) {
 fun TopDesign(
     isResult: MutableState<Boolean>,
     textNumbersFirst: MutableState<String>,
-    textNumberSecond: MutableState<String>,
-    errorExpress: MutableState<Pair<Boolean, String>>,
-    context: Context
+    textNumberSecond: MutableState<String>
 ) {
 
-
-    if (errorExpress.value.first) {
-        textNumberSecond.value = "Error!..."
-        Toast.makeText(context, errorExpress.value.second, Toast.LENGTH_SHORT).show()
-        errorExpress.value = Pair(false, "")
-    }
-
+    //If show result === true (click button '=')
     if (isResult.value) {
-        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h5, Color.DarkGray)
-        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h4, Color.Black)
-    } else {
-        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h4, Color.Black)
-        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h5, Color.DarkGray)
+        //FirstText
+        TextCalculate(
+            textNumbersFirst.value,
+            MaterialTheme.typography.h5,
+            MaterialTheme.colors.onSurface
+        )
+        //SecondText
+        TextCalculate(
+            textNumberSecond.value,
+            MaterialTheme.typography.h4,
+            MaterialTheme.colors.onPrimary
+        )
+    }
+    //If show result === true
+    else {
+        //FirstText
+        TextCalculate(
+            textNumbersFirst.value,
+            MaterialTheme.typography.h4,
+            MaterialTheme.colors.onPrimary
+        )
+        //SecondText
+        TextCalculate(
+            textNumberSecond.value,
+            MaterialTheme.typography.h5,
+            MaterialTheme.colors.onSurface
+        )
     }
 
 
@@ -370,15 +387,6 @@ private fun CalculatorButton(
             style = MaterialTheme.typography.h4,
             textAlign = TextAlign.Center
         )
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    CalculatorComposeTheme {
-        //CalculatorScreen(viewModel)
     }
 }
 
