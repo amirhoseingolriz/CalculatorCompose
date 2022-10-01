@@ -54,6 +54,8 @@ class CalculatorViewModel : ViewModel() {
             textNumberSecond.value = "0"
             if (!errorExpress.value.first) {
                 textNumbersFirst.value = textNumberSecond.value
+            } else {
+                textNumbersFirst.value = "0"
             }
         }
         if ((textNumbersFirst.value.last() == '+' ||
