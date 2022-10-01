@@ -33,6 +33,12 @@ class CalculatorViewModel : ViewModel() {
 
     private fun numberClicked(number: Int) {
 
+        if (isShowResult.value) {
+            isShowResult.value = false
+            textNumbersFirst.value = ""
+            textNumberSecond.value = "0"
+        }
+
         if (textNumbersFirst.value != "0") {
             textNumbersFirst.value += number.toString()
         } else {
@@ -45,8 +51,10 @@ class CalculatorViewModel : ViewModel() {
 
         if (isShowResult.value) {
             isShowResult.value = false
-            textNumbersFirst.value = textNumberSecond.value
             textNumberSecond.value = "0"
+            if (!errorExpress.value.first) {
+                textNumbersFirst.value = textNumberSecond.value
+            }
         }
         if ((textNumbersFirst.value.last() == '+' ||
                     textNumbersFirst.value.last() == '-' ||
@@ -62,6 +70,12 @@ class CalculatorViewModel : ViewModel() {
     }
 
     private fun decimalClicked() {
+
+        if (isShowResult.value) {
+            isShowResult.value = false
+            textNumbersFirst.value = "0"
+            textNumberSecond.value = "0"
+        }
 
         if (textNumbersFirst.value != "" || textNumbersFirst.value != "0") {
             if (!textNumbersFirst.value.contains(".") &&

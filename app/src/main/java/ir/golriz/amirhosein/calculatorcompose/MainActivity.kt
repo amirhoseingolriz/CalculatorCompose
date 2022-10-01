@@ -113,6 +113,7 @@ fun TopDesign(
     if (errorExpress.value.first) {
         textNumberSecond.value = "Error!..."
         Toast.makeText(context, errorExpress.value.second, Toast.LENGTH_SHORT).show()
+        errorExpress.value = Pair(false, "")
     }
 
     if (isResult.value) {
