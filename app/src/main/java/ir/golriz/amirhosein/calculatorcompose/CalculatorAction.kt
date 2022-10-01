@@ -11,12 +11,12 @@ sealed class CalculatorAction {
 
 }
 
-sealed class CalculatorOperation(val operation: String) {
+sealed class CalculatorOperation(val symbol: String) {
 
     object Sum : CalculatorOperation("+")
     object Minus : CalculatorOperation("-")
-    object Multiply : CalculatorOperation("×")
-    object Divide : CalculatorOperation("÷")
+    object Multiply : CalculatorOperation("*")
+    object Divide : CalculatorOperation("/")
     object ParenthesesLeft : CalculatorOperation("(")
     object ParenthesesRight : CalculatorOperation(")")
 

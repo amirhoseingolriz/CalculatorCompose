@@ -1,106 +1,120 @@
 package ir.golriz.amirhosein.calculatorcompose
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import net.objecthunter.exp4j.ExpressionBuilder
+import java.math.RoundingMode
 
 class CalculatorViewModel : ViewModel() {
 
     val textNumbersFirst = mutableStateOf("0")
     val textNumberSecond = mutableStateOf("0")
     val isShowResult = mutableStateOf(false)
+    val errorExpress = mutableStateOf(Pair(false, ""))
 
 
     fun onAction(action: CalculatorAction) {
 
 
-        when(action){
+        when (action) {
 
+            is CalculatorAction.Number -> numberClicked(action.number)
+            is CalculatorAction.Operation -> operationClicked(action.operation)
+
+            is CalculatorAction.Decimal -> decimalClicked()
+            is CalculatorAction.Delete -> deleteCalculate()
+            is CalculatorAction.Clear -> clearCalculate()
+
+            is CalculatorAction.Equal -> equalCalculate()
 
         }
 
-        /*
-        Divide
-         if (
-                textNumbers.value.last() == '*' ||
-                textNumbers.value.last() == '+' ||
-                textNumbers.value.last() == '-'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += ""
-            } else if (textNumbers.value.last() != '÷') {
-                textNumbers.value += "×"
-            }
+    }
 
+    private fun numberClicked(number: Int) {
 
-            Multiply
-            if (
-                textNumbers.value.last() == '+' ||
-                textNumbers.value.last() == '/' ||
-                textNumbers.value.last() == '-'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += "*"
-            } else if (textNumbers.value.last() != '*') {
-                textNumbers.value += "*"
-            }
-
-
-            Minus
-            if (
-                textNumbers.value.last() == '*' ||
-                textNumbers.value.last() == '/' ||
-                textNumbers.value.last() == '+'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += "-"
-            } else if (textNumbers.value.last() != '-') {
-                textNumbers.value += "-"
-            }
-
-            Sum
-                if (
-                textNumbers.value.last() == '*' ||
-                textNumbers.value.last() == '/' ||
-                textNumbers.value.last() == '-'
-            ) {
-                textNumbers.value =
-                    textNumbers.value.substring(0, textNumbers.value.lastIndex)
-                textNumbers.value += "+"
-            } else if (textNumbers.value.last() != '+') {
-                textNumbers.value += "+"
-            }
-
-
-
-            Dot
-
-            if (textNumbers.value.isNotEmpty()) {
-                if (
-                    !textNumbers.value.contains(".") &&
-                    textNumbers.value.last() != '+' &&
-                    textNumbers.value.last() != '-' &&
-                    textNumbers.value.last() != '*' &&
-                    textNumbers.value.last() != '/' &&
-                    textNumbers.value.last() != '(' &&
-                    textNumbers.value.last() != ')'
-                ) {
-                    Log.e("Adas", textNumbers.value.last().toString())
-                    if (textNumbers.value == "0") {
-                        textNumbers.value += "0."
-                    } else {
-                        textNumbers.value += "."
-                    }
-
-                }
-            } else {
-                textNumbers.value += "0."
-            }
-         */
+        if (textNumbersFirst.value != "0") {
+            textNumbersFirst.value += number.toString()
+        } else {
+            textNumbersFirst.value = number.toString()
+        }
 
     }
+
+    private fun operationClicked(operation: CalculatorOperation) {
+
+        if (isShowResult.value) {
+            isShowResult.value = false
+            textNumbersFirst.value = textNumberSecond.value
+            textNumberSecond.value = "0"
+        }
+        if ((textNumbersFirst.value.last() == '+' ||
+                    textNumbersFirst.value.last() == '-' ||
+                    textNumbersFirst.value.last() == '*' ||
+                    textNumbersFirst.value.last() == '/') &&
+            operation != CalculatorOperation.ParenthesesLeft
+        ) {
+            textNumbersFirst.value = textNumbersFirst.value.dropLast(1) + operation.symbol
+        } else {
+            textNumbersFirst.value += operation.symbol
+        }
+
+    }
+
+    private fun decimalClicked() {
+
+        if (textNumbersFirst.value != "" || textNumbersFirst.value != "0") {
+            if (!textNumbersFirst.value.contains(".") &&
+                textNumbersFirst.value.last() != '+' &&
+                textNumbersFirst.value.last() != '-' &&
+                textNumbersFirst.value.last() != '*' &&
+                textNumbersFirst.value.last() != '/' &&
+                textNumbersFirst.value.last() != '(' &&
+                textNumbersFirst.value.last() != ')'
+            ) {
+                textNumbersFirst.value += "."
+            }
+        } else {
+            textNumbersFirst.value = "0."
+        }
+
+    }
+
+    private fun deleteCalculate() {
+
+        textNumbersFirst.value = textNumbersFirst.value.dropLast(1)
+
+    }
+
+    private fun clearCalculate() {
+
+        textNumbersFirst.value = "0"
+        textNumberSecond.value = "0"
+        isShowResult.value = false
+
+    }
+
+    private fun equalCalculate() {
+
+        isShowResult.value = true
+
+        try {
+            errorExpress.value = Pair(false, "")
+            val express = ExpressionBuilder(textNumbersFirst.value).build()
+            val result = express.evaluate()
+
+            if (result == result.toLong().toDouble()) {
+                textNumberSecond.value = result.toLong().toString()
+            } else {
+                textNumberSecond.value =
+                    result.toBigDecimal().setScale(4, RoundingMode.DOWN).toString()
+            }
+
+        } catch (error: Exception) {
+            errorExpress.value = Pair(true, error.toString())
+        }
+
+    }
+
 
 }

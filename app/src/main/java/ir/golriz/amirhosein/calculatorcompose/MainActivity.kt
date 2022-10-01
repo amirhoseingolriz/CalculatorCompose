@@ -1,22 +1,26 @@
 package ir.golriz.amirhosein.calculatorcompose
 
+import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,14 +35,14 @@ class MainActivity : ComponentActivity() {
         val viewModel = ViewModelProvider(this)[CalculatorViewModel::class.java]
         setContent {
             CalculatorComposeTheme {
-                CalculatorScreen(viewModel)
+                CalculatorScreen(viewModel = viewModel, context = this)
             }
         }
     }
 }
 
 @Composable
-fun CalculatorScreen(viewModel: CalculatorViewModel) {
+fun CalculatorScreen(viewModel: CalculatorViewModel, context: Context) {
 
     Column(
         Modifier
@@ -56,9 +60,11 @@ fun CalculatorScreen(viewModel: CalculatorViewModel) {
         ) {
 
             TopDesign(
-                viewModel.isShowResult,
-                viewModel.textNumbersFirst,
-                viewModel.textNumberSecond
+                isResult = viewModel.isShowResult,
+                textNumbersFirst = viewModel.textNumbersFirst,
+                textNumberSecond = viewModel.textNumberSecond,
+                errorExpress = viewModel.errorExpress,
+                context = context
             )
 
         }
@@ -98,20 +104,36 @@ fun CalculatorScreen(viewModel: CalculatorViewModel) {
 fun TopDesign(
     isResult: MutableState<Boolean>,
     textNumbersFirst: MutableState<String>,
-    textNumberSecond: MutableState<String>
+    textNumberSecond: MutableState<String>,
+    errorExpress: MutableState<Pair<Boolean, String>>,
+    context: Context
 ) {
-    if (isResult.value) {
-        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h3, Color.Black)
-        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h4, Color.DarkGray)
-    } else {
-        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h4, Color.DarkGray)
-        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h3, Color.Black)
+
+
+    if (errorExpress.value.first) {
+        textNumberSecond.value = "Error!..."
+        Toast.makeText(context, errorExpress.value.second, Toast.LENGTH_SHORT).show()
     }
+
+    if (isResult.value) {
+        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h5, Color.DarkGray)
+        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h4, Color.Black)
+    } else {
+        TextCalculate(textNumbersFirst.value, MaterialTheme.typography.h4, Color.Black)
+        TextCalculate(textNumberSecond.value, MaterialTheme.typography.h5, Color.DarkGray)
+    }
+
 
 }
 
 @Composable
 fun TextCalculate(text: String, textStyle: TextStyle, color: Color) {
+
+    val scroll = rememberScrollState(0)
+
+    LaunchedEffect(scroll.maxValue) {
+        scroll.animateScrollTo(scroll.maxValue)
+    }
 
     Text(
         text = text,
@@ -122,6 +144,7 @@ fun TextCalculate(text: String, textStyle: TextStyle, color: Color) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp)
+            .horizontalScroll(scroll)
     )
 
 }
@@ -276,7 +299,7 @@ fun BottomDesign(onAction: (CalculatorAction) -> Unit) {
             color = MaterialTheme.colors.secondary,
             modifier = Modifier
         ) {
-            onAction(CalculatorAction.Operation(CalculatorOperation.Minus))
+            onAction(CalculatorAction.Operation(CalculatorOperation.Sum))
         }
 
     }
@@ -313,7 +336,9 @@ fun BottomDesign(onAction: (CalculatorAction) -> Unit) {
         CalculatorButton(
             textButton = "=",
             color = MaterialTheme.colors.onSecondary,
-            modifier = Modifier.background(MaterialTheme.colors.secondary).padding(bottom = 4.dp)
+            modifier = Modifier
+                .background(MaterialTheme.colors.secondary)
+                .padding(bottom = 4.dp)
         ) {
             onAction(CalculatorAction.Equal)
         }
