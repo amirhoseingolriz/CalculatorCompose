@@ -113,11 +113,13 @@ fun TopDesign(
     //If show result === true (click button '=')
     if (isResult.value) {
         //FirstText
-        TextCalculate(
-            textNumbersFirst.value,
-            MaterialTheme.typography.h5,
-            MaterialTheme.colors.onSurface
-        )
+        if (textNumbersFirst.value != "0" && textNumberSecond.value != "0") {
+            TextCalculate(
+                textNumbersFirst.value,
+                MaterialTheme.typography.h5,
+                MaterialTheme.colors.onSurface
+            )
+        }
         //SecondText
         TextCalculate(
             textNumberSecond.value,
@@ -128,11 +130,13 @@ fun TopDesign(
     //If show result === true
     else {
         //FirstText
-        TextCalculate(
-            textNumbersFirst.value,
-            MaterialTheme.typography.h4,
-            MaterialTheme.colors.onPrimary
-        )
+        if (textNumbersFirst.value != "0" && textNumberSecond.value != "0") {
+            TextCalculate(
+                textNumbersFirst.value,
+                MaterialTheme.typography.h4,
+                MaterialTheme.colors.onPrimary
+            )
+        }
         //SecondText
         TextCalculate(
             textNumberSecond.value,

@@ -18,6 +18,9 @@ class CalculatorViewModel : ViewModel() {
         } catch (error: Exception) {
             Log.e("ErrorLiveExpress", error.toString())
         }
+        if (textNumbersFirst.value == "") {
+            textNumberSecond.value = "0"
+        }
     }
 
     fun onAction(action: CalculatorAction) {
